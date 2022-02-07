@@ -427,19 +427,549 @@ class IntroduceSegmentPair(Scene):
 
         self.play(FadeOut(word1))
 
-        word2 = TexText("给出了这些，接下来怎样计算？", font_size=50)
+        self.wait()
+
+class Solving(Scene):
+    def construct(self):
+        word1 = TexText("给出了这些，接下来怎样计算？", font_size=50)
+        self.play(Write(word1))
+        self.play(word1.animate.to_edge(DOWN,buff=0.4))
+
+        self.wait(1.5)
+
+        word2 = TexText("不妨从面积的式子算起", font_size=50)
+        word2.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word1, word2),
+            rate_func=exponential_decay
+        )
+
+        self.wait(1.5)
+
+        to_isolate = ["a", "b", "x", "y"]
+        t2c_map1 = {
+                "a": BLUE,
+                "b": TEAL,
+                "x": YELLOW_C,
+                "y": GOLD_C
+            }
+
+        lines = VGroup(
+            Tex("S=", "a", r"\cdot ", "b"),
+            Tex("S", "=", "ax+ay+bx+by", isolate=to_isolate),
+            Tex(r"S=  \sum_{i=1}^{n} a_i  \cdot \sum_{i=1}^{m} b_i", isolate=to_isolate),
+        )
+        lines.arrange(DOWN, buff=MED_LARGE_BUFF)
+        for line in lines:
+            line.set_color_by_tex_to_color_map(t2c_map1)
+
+        lines[1].shift(0.25*RIGHT)
+
+        new_line0 = Tex(r"S=( a + b ) \cdot ( x + y )", isolate=to_isolate)
+        new_line0.set_color_by_tex_to_color_map(t2c_map1)
+
+        play_kw = {"run_time": 2}
+        fplay_kw = {"run_time": 0.75}
+        self.play(Write(lines[0]))
+
+        word1 = TexText("这是对于单独一个长方形的表达", font_size=50)
+        word1.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word2, word1)
+        )
+
+        self.wait(1.5)
+
+        word2 = TexText("如果我们想同时算多个，还能找到起作用的式子吗？", font_size=50)
         word2.to_edge(DOWN,buff=0.4)
         self.play(
             ReplacementTransform(word1, word2)
         )
 
-        word1 = TexText("给出了这些，接下来怎样计算？", font_size=50)
+        self.wait(2)
+
+        word1 = TexText("或许可以想一想多项式乘法", font_size=50)
         word1.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word2, word1)
+        )
+
+        self.wait(1.5)
+
+        word2 = TexText(r"把面积式子中长与宽写入多个 $\dots$", font_size=50)
+        word2.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word1, word2)
+        )
+
+        self.wait(1.5)
+
+        new_line0.to_edge(UP,buff=LARGE_BUFF)
+
+        self.play(
+            TransformMatchingTex(
+                lines[0], new_line0,
+                transform_mismatches=True
+            ),
+            **fplay_kw
+        )
+        self.wait(1.5)
+
+        lines.to_edge(UP,buff=LARGE_BUFF)
+
+        word1 = TexText("逐项展开这个积", font_size=50)
+        word1.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word2, word1)
+        )
+
+        self.wait(1.5)
+
+        # Rect_AX
+
+        rect_ax_vg = VGroup()
+        rect_ax = Rectangle(
+            width=1,
+            height=0.75
+        )
+        
+        rect_ax.set_color_by_gradient((BLUE, YELLOW))
+
+        rect_ax_tex = Tex("ax", isolate=to_isolate)
+        rect_ax_tex.set_color_by_tex_to_color_map(t2c_map1)
+
+        rect_ax.move_to(5*LEFT+1.5*DOWN)
+
+        rect_ax_vg.add(rect_ax)
+
+        brace_ax_a = BraceLabel(
+            obj=rect_ax,
+            text="",
+            brace_direction=UP
+        )
+        brace_ax_x = BraceLabel(
+            obj=rect_ax,
+            text="",
+            brace_direction=RIGHT
+        )
+
+        a_copy = new_line0[1].copy()
+        x_copy = new_line0[5].copy()
+
+        rect_ax_vg.add(brace_ax_a)
+        rect_ax_vg.add(brace_ax_x)
+        rect_ax_vg.add(a_copy, x_copy, rect_ax_tex)
+
+        self.play(
+            a_copy.animate.next_to(brace_ax_a, UP),
+            x_copy.animate.next_to(brace_ax_x, RIGHT),
+            Write(brace_ax_a),
+            Write(brace_ax_x),
+        )
+
+        rect_ax_tex.move_to(rect_ax.get_center())
+
+        self.play(ShowCreation(rect_ax), Write(rect_ax_tex))
+
+        rect_ax_tex_copy = rect_ax_tex.copy()
+
+        self.play(
+            FadeIn(lines[1][1]), # =
+            FadeIn(lines[1][4]), # +
+            ReplacementTransform(
+                rect_ax_tex_copy[0], lines[1][2], # a
+            ),
+            ReplacementTransform(
+                rect_ax_tex_copy[1], lines[1][3], # x
+            ),
+            **fplay_kw
+        )
+
+        ''' AY '''
+
+        rect_ay_vg = VGroup()
+        rect_ay = Rectangle(
+            width=1,
+            height=0.5
+        )
+
+        rect_ay.set_color_by_gradient((BLUE, GOLD))
+
+        rect_ay_tex = Tex("ay", isolate=to_isolate)
+        rect_ay_tex.set_color_by_tex_to_color_map(t2c_map1)
+
+        rect_ay.move_to(2.5*LEFT+1.5*DOWN)
+
+        rect_ay_vg.add(rect_ay)
+
+        brace_ay_a = BraceLabel(
+            obj=rect_ay,
+            text="",
+            brace_direction=UP
+        )
+        brace_ay_y = BraceLabel(
+            obj=rect_ay,
+            text="",
+            brace_direction=RIGHT
+        )
+
+        a_copy = new_line0[1].copy()
+        y_copy = new_line0[7].copy()
+
+        rect_ay_vg.add(brace_ay_a)
+        rect_ay_vg.add(brace_ay_y)
+        rect_ay_vg.add(a_copy, y_copy, rect_ay_tex)
+
+        self.play(
+            a_copy.animate.next_to(brace_ay_a, UP),
+            y_copy.animate.next_to(brace_ay_y, RIGHT),
+            Write(brace_ay_a),
+            Write(brace_ay_y),
+        )
+
+        rect_ay_tex.move_to(rect_ay.get_center())
+
+        self.play(ShowCreation(rect_ay), Write(rect_ay_tex))
+
+        rect_ay_tex_copy = rect_ay_tex.copy()
+
+        self.play(
+            FadeIn(lines[1][7]), # +
+            ReplacementTransform(
+                rect_ay_tex_copy[0], lines[1][5], # a
+            ),
+            ReplacementTransform(
+                rect_ay_tex_copy[1], lines[1][6], # y
+            ),
+            **fplay_kw
+        )
+
+
+        ''' BX '''
+
+        rect_bx_vg = VGroup()
+        rect_bx = Rectangle(
+            width=1.5,
+            height=0.75
+        )
+
+        rect_bx.set_color_by_gradient((TEAL, YELLOW))
+
+        rect_bx_tex = Tex("bx", isolate=to_isolate)
+        rect_bx_tex.set_color_by_tex_to_color_map(t2c_map1)
+
+        rect_bx.move_to(1.5*RIGHT+1.5*DOWN)
+
+        rect_bx_vg.add(rect_bx)
+
+        brace_bx_b = BraceLabel(
+            obj=rect_bx,
+            text="",
+            brace_direction=UP
+        )
+        brace_bx_x = BraceLabel(
+            obj=rect_bx,
+            text="",
+            brace_direction=RIGHT
+        )
+
+        b_copy = new_line0[3].copy()
+        x_copy = new_line0[5].copy()
+
+        rect_bx_vg.add(brace_bx_b)
+        rect_bx_vg.add(brace_bx_x)
+        rect_bx_vg.add(b_copy, x_copy, rect_bx_tex)
+
+        self.play(
+            b_copy.animate.next_to(brace_bx_b, UP),
+            x_copy.animate.next_to(brace_bx_x, RIGHT),
+            Write(brace_bx_b),
+            Write(brace_bx_x),
+        )
+
+        rect_bx_tex.move_to(rect_bx.get_center())
+
+        self.play(ShowCreation(rect_bx), Write(rect_bx_tex))
+
+        rect_bx_tex_copy = rect_bx_tex.copy()
+
+        self.play(
+            FadeIn(lines[1][10]), # +
+            ReplacementTransform(
+                rect_bx_tex_copy[0], lines[1][8], # a
+            ),
+            ReplacementTransform(
+                rect_bx_tex_copy[1], lines[1][9], # x
+            ),
+            **fplay_kw
+        )
+
+        ''' BY '''
+
+        rect_by_vg = VGroup()
+        rect_by = Rectangle(
+            width=1.5,
+            height=0.5
+        )
+
+        rect_by.set_color_by_gradient((TEAL, GOLD))
+
+        rect_by_tex = Tex("by", isolate=to_isolate)
+        rect_by_tex.set_color_by_tex_to_color_map(t2c_map1)
+
+        rect_by.move_to(4.5*RIGHT+1.5*DOWN)
+
+        rect_by_vg.add(rect_by)
+
+        brace_by_b = BraceLabel(
+            obj=rect_by,
+            text="",
+            brace_direction=UP
+        )
+        brace_by_y = BraceLabel(
+            obj=rect_by,
+            text="",
+            brace_direction=RIGHT
+        )
+
+        b_copy = new_line0[3].copy()
+        y_copy = new_line0[7].copy()
+
+        rect_by_vg.add(brace_by_b)
+        rect_by_vg.add(brace_by_y)
+        rect_by_vg.add(b_copy, y_copy, rect_by_tex)
+
+        self.play(
+            b_copy.animate.next_to(brace_by_b, UP),
+            y_copy.animate.next_to(brace_by_y, RIGHT),
+            Write(brace_by_b),
+            Write(brace_by_y),
+        )
+
+        rect_by_tex.move_to(rect_by.get_center())
+
+        self.play(ShowCreation(rect_by), Write(rect_by_tex))
+
+        rect_by_tex_copy = rect_by_tex.copy()
+
+        self.play(
+            ReplacementTransform(
+                rect_by_tex_copy[0], lines[1][11], # a
+            ),
+            ReplacementTransform(
+                rect_by_tex_copy[1], lines[1][12], # x
+            ),
+            **fplay_kw
+        )
+
+        ''' Four Rects finished '''
+
+        word2 = TexText("可以发现，结果正好是全部以第一个括号内的一个变量为长\\\\第二个括号内一个变量为宽的所有长方形面积和", font_size=50)
+        word2.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word1, word2)
+        )
+
+        self.wait(3)
+
+        word1 = TexText("这个想法对于一般的情况也适用", font_size=50)
+        word1.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word2, word1)
+        )
+
+        self.wait(1.5)
+
+        word2 = TexText(r"给定 $n$ 条长和 $m$ 条宽，我们给出能组成所有矩形的面积和", font_size=50)
+        word2.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word1, word2)
+        )
+
+        self.play(
+            Uncreate(rect_ax_vg), Uncreate(rect_bx_vg), Uncreate(rect_ay_vg), Uncreate(rect_by_vg),
+            FadeOut(new_line0), FadeOut(lines[1])
+        )
+
+        self.play(Write(lines[2]))
+
+        self.wait(3)
+
+        word1 = TexText("回到原问题，基于前面建立的线段对与矩形的关系", font_size=50)
+        word1.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word2, word1)
+        )
+
+        self.wait(2)
+
+        word2 = TexText(r"所有矩形 $\Leftrightarrow$ 线段对， \\ 并可利用长、宽方向上每条线段长度的和做乘法计算面积", font_size=50)
+        word2.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word1, word2)
+        )
+
+        self.wait(3)
+
+        word1 = TexText("每个方向上和的计算并不复杂，这里以宽为例", font_size=50)
+        word1.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word2, word1),
+            FadeOut(lines[2])
+        )
+
+        segments = VGroup(
+            Line(2*LEFT, 1*LEFT).set_color(BLUE),
+            Line(1*LEFT, 0.5*RIGHT).set_color(TEAL),
+            Line(0.5*RIGHT, 2*RIGHT).set_color(GREEN)
+        )
+
+        segment_braces = VGroup(
+            BraceLabel(
+                obj=segments[0],
+                text="a",
+                brace_direction=UP
+            ),
+            BraceLabel(
+                obj=segments[1],
+                text="b",
+                brace_direction=UP
+            ),
+            BraceLabel(
+                obj=segments[2],
+                text="c",
+                brace_direction=UP
+            )
+        )
+
+        segments.add(segment_braces)
+
+        self.play(Write(segments))
+
+        word2 = TexText(r"先来看由一个最基本单位构成的所有线段", font_size=50)
+        word2.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word1, word2)
+        )
+
+        self.wait(1.5)
+
+        to_isolate = ["a", "b", "c", "x", "y", "z"]
+        segment_lines = VGroup(
+            Tex("L=a+b+c+(a+b)+(b+c)+(a+b+c)", isolate=to_isolate),
+            Tex("L=3a+4b+3c", isolate=to_isolate),
+            Tex("M=3x+4y+3z", isolate=to_isolate)
+        )
+        segment_lines.arrange(DOWN, buff=MED_LARGE_BUFF)
+
+        segment_lines.to_edge(UP, buff=LARGE_BUFF)
+        
+        t2c_map2 = {
+                "a": BLUE,
+                "b": TEAL,
+                "c": GREEN,
+                "x": YELLOW,
+                "Y": GOLD,
+                "z": RED
+            }
+
+        for line in segment_lines:
+            line.set_color_by_tex_to_color_map(t2c_map2)
+
+        self.play(
+            Write(segment_lines[0][0]),
+            Write(segment_lines[0][2]),
+            Write(segment_lines[0][4]),
+            ReplacementTransform(segments[0].copy(), segment_lines[0][1]), # a
+            ReplacementTransform(segments[1].copy(), segment_lines[0][3]), # b
+            ReplacementTransform(segments[2].copy(), segment_lines[0][5]), # c
+        )
+
+        self.wait(1.5)
+
+        word1 = TexText("再考虑由两段基本单位构成的线段", font_size=50)
+        word1.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word2, word1),
+        )
+
+        temp_line1 = Line(2*LEFT, 0.5*RIGHT).set_color(YELLOW)
+        temp_line2 = Line(1*LEFT, 2*RIGHT).set_color(ORANGE)
+
+        self.play(Write(temp_line1))
+
+        self.play(temp_line1.shift(0.5*DOWN))
+
+        self.play(
+            Indicate(temp_line1),
+            Write(segment_lines[0][6]),
+            Write(segment_lines[0][8]),
+            Write(segment_lines[0][10]),
+            ReplacementTransform(temp_line1, VGroup(segment_lines[0][7], segment_lines[0][9])),
+        )
+
+        self.wait()
+
+        self.play(Write(temp_line2))
+
+        self.play(temp_line2.shift(0.5*DOWN))
+
+        self.play(
+            Indicate(temp_line2),
+            Write(segment_lines[0][12]),
+            Write(segment_lines[0][14]),
+            ReplacementTransform(temp_line2, VGroup(segment_lines[0][11], segment_lines[0][13])),
+        )
+
+        self.wait(1.5)
+
+        temp_line3 = Line(2*LEFT, 2*RIGHT).set_color(RED)
+
+        word2 = TexText(r"最后是全长一段", font_size=50)
+        word2.to_edge(DOWN,buff=0.4)
         self.play(
             ReplacementTransform(word1, word2)
         )
 
         self.wait()
 
-class IntroduceSegmentPair(Scene):
-    def construct(self):
+        self.play(Write(temp_line3))
+        self.play(temp_line3.shift(0.5*DOWN))
+        self.play(
+            Indicate(temp_line3),
+            Write(segment_lines[0][16]),
+            Write(segment_lines[0][18]),
+            Write(segment_lines[0][20]),
+            ReplacementTransform(temp_line3, VGroup(segment_lines[0][15], segment_lines[0][17], segment_lines[0][19])),
+        )
+
+        self.wait(1.5)
+
+        word1 = TexText("合并同类项", font_size=50)
+        word1.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word2, word1)
+        )
+
+        self.play(
+            TransformMatchingTex(
+                segment_lines[0].copy(), segment_lines[1],
+                transform_mismatches=False
+            ),
+            **play_kw
+        )
+
+        self.wait(2)
+
+        word2 = TexText(r"对于宽方向同理", font_size=50)
+        word2.to_edge(DOWN,buff=0.4)
+        self.play(
+            ReplacementTransform(word1, word2)
+        )
+
+        self.play(
+            Write(segment_lines[2]),
+            FadeOut(segments)
+        )
+
+        self.embed()
